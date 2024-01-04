@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : true}));
 const fileUpload = require('express-fileupload');
-app.use(fileUpload());  
+app.use(fileUpload({useTempFiles : true,tempFileDir : '/tmp/'}));  
 
 const apiRoutes = require('./routes/fileupload');
 app.use('/api/v1/upload' , apiRoutes);
