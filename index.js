@@ -24,4 +24,4 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
 })
 connectDB();
-cloudinaryConnect();
+cloudinaryConnect.cloudinaryConnect();
