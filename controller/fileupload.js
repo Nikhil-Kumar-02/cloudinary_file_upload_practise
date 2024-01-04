@@ -23,9 +23,12 @@ const localfileUpload = async (req,res) => {
     }
 }
 
-async function uploadToCloudinary(file , folder){
+async function uploadToCloudinary(file , folder , quality){
     const options = {folder};
     options.resource_type = "auto";
+    if(quality){
+        options.quality = quality;
+    }
     console.log('printing the options  ' , folder);
     console.log('temp file path' , file.tempFilePath);
     return await cloudinary.uploader.upload(file.tempFilePath , options);
@@ -107,9 +110,46 @@ const videoUpload = async (req,res) => {
     }
 }
 
+const croppedImage = async (req,res) => {
+    try {
+        const {name , email , tags} = req.body;
+        console.log(name,  email , tags);
+        const file = req.files.image;
+        console.log('the image sent is ' , file);
+
+        const supportedType = ["jpg" , "jpeg" , "png"];
+        const fileType = file.name.split('.')[1].toLowerCase();
+        console.log('the recieved file type ' , fileType);
+
+        if(!isFileTypeSupported(fileType , supportedType)){
+            res.status(400).json({
+                message : "input type of file is not supported"
+            })
+        }
+
+        //now we can upload to cloudinary
+        console.log('temp file path' , file.tempFilePath);
+        const response = await uploadToCloudinary(file , "testUpload" , 10);
+        //'testUpload' this was the name of the folder on cloudinary where i want to upload the data to
+        const dbResponse = await File.create({name , email , tags , imageUrl : response.secure_url})
+
+        res.status(200).json({
+            message : "sucessfully uploaded to cloudinary",
+            data : response,
+            databaseResponse : dbResponse
+        })
+
+        } catch (error) {
+            res.status(300).status({
+                err : error
+            })
+    }
+}
+
 
 module.exports = {
     localfileUpload , 
     imageUpload,
-    videoUpload
+    videoUpload,
+    croppedImage
 };
